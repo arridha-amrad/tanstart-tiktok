@@ -6,12 +6,11 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 
-import Header from "../components/Header";
-
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 
 import appCss from "../styles.css?url";
 
+import { getThemeServerFn } from "@/lib/theme";
 import type { QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
@@ -43,27 +42,34 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
   }),
-
   shellComponent: RootDocument,
+  loader: () => getThemeServerFn(),
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const saved = localStorage.getItem("theme") as "dark" | "light" | null;
-    const initial =
-      saved ??
-      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    console.log({ initial });
+  const theme = Route.useLoaderData();
 
-    document.documentElement.classList.toggle("dark", initial === "dark");
+  useEffect(() => {
+    if (typeof theme === "undefined") {
+      console.log("match with system");
+      const isDeviceDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      document.documentElement.classList.toggle("dark", isDeviceDark);
+    }
   }, []);
+
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={theme !== undefined ? theme : ""}
+      suppressHydrationWarning
+    >
       <head>
         <HeadContent />
       </head>
       <body>
-        <Header />
+        {/* <Header /> */}
         {children}
         <TanStackDevtools
           config={{
