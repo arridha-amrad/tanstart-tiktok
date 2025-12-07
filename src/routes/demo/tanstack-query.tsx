@@ -50,9 +50,10 @@ export const Route = createFileRoute("/demo/tanstack-query")({
   loader: async ({ context }) => {
     context.queryClient.ensureQueryData(options);
   },
-  pendingComponent: () => {
-    return <p>loading component...</p>;
-  },
+  head: (ctx) => ({
+    ...ctx,
+    meta: [{ title: "Tanstack-Query" }],
+  }),
 });
 
 function TanStackQueryDemo() {
